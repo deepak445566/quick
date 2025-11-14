@@ -1,39 +1,35 @@
-// Create and send token in cookie
 const sendToken = (user, statusCode, res) => {
-  try {
-    // Create JWT token
-    const token = user.getJwtToken();
+  // Create JWT token
+  const token = user.getJwtToken();
 
-    // Options for cookie
-    const options = {
-      expires: new Date(
-        Date.now() + (process.env.COOKIE_EXPIRE || 7) * 24 * 60 * 60 * 1000
-      ),
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
-    };
+  console.log('🔐 Sending token to user:', user.email);
+  console.log('🌍 Current environment:', process.env.NODE_ENV);
 
-    console.log('🟡 Sending token response...');
-    res.status(statusCode)
-      .cookie('token', token, options)
-      .json({
-        success: true,
-        token,
-        user: {
-          id: user._id,
-          fullname: user.fullname,
-          email: user.email
-        }
-      });
+  // ✅ Fixed cookie options
+  const cookieOptions = {
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    httpOnly: true,
+    secure: false, // ✅ Temporary false karein - local testing ke liye
+    sameSite: 'lax', // ✅ Temporary lax karein
+    path: '/'
+  };
 
-  } catch (error) {
-    console.error('🔴 Send token error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error generating token: ' + error.message
-    });
+  // ✅ Production mein secure aur sameSite change karein
+  if (process.env.NODE_ENV === 'production') {
+    cookieOptions.secure = true;
+    cookieOptions.sameSite = 'none';
   }
+
+  console.log('🍪 Cookie Options:', cookieOptions);
+
+  res.status(statusCode)
+    .cookie('token', token, cookieOptions)
+    .json({
+      success: true,
+      token, // ✅ Response mein bhi token bhejein
+      user,
+      message: 'Login successful - check browser cookies'
+    });
 };
 
 export default sendToken;

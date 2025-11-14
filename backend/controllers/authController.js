@@ -107,9 +107,12 @@ export const loginUser = async (req, res, next) => {
 
 // Logout user
 export const logoutUser = async (req, res, next) => {
-  res.cookie('token', null, {
+  // ✅ Simple and effective
+  res.cookie('token', '', {
     expires: new Date(Date.now()),
-    httpOnly: true
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   });
 
   res.status(200).json({

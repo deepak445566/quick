@@ -4,11 +4,7 @@ import axios from 'axios';
 const AuthContext = createContext();
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  return useContext(AuthContext);
 };
 
 export const AuthProvider = ({ children }) => {
@@ -16,74 +12,70 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.defaults.baseURL = 'https://quick-4p16.onrender.com/api';
+    // ✅ COMPLETE RESET - Fresh configuration
+    axios.defaults.baseURL = 'http://localhost:5000/api';
     axios.defaults.withCredentials = true;
-  }, []);
-
-  useEffect(() => {
+    
+    console.log('🔄 Axios configured for:', axios.defaults.baseURL);
+    
     checkUserLoggedIn();
   }, []);
 
   const checkUserLoggedIn = async () => {
     try {
+      console.log('🔍 Checking auth status...');
       const response = await axios.get('/auth/me');
+      console.log('✅ User found:', response.data.user);
       setUser(response.data.user);
     } catch (error) {
-      // ✅ 401 error is normal when no user is logged in
-      if (error.response?.status === 401) {
-        console.log('No user logged in (401) - This is normal');
-      } else {
-        console.error('Error checking auth:', error.response?.data || error.message);
-      }
+      console.log('❌ No user logged in');
+      console.log('🍪 Available cookies:', document.cookie);
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
- // Register user with better error handling
-const register = async (userData) => {
-  try {
-    console.log('Registering user:', userData);
-    const response = await axios.post('/auth/register', userData);
-    setUser(response.data.user);
-    return { success: true, data: response.data };
-  } catch (error) {
-    console.error('🔴 Registration error details:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message
-    });
-    
-    let errorMessage = 'Registration failed';
-    
-    // ✅ Get actual error message from backend
-    if (error.response?.data?.message) {
-      errorMessage = error.response.data.message;
-    } else if (error.response?.data?.error) {
-      errorMessage = error.response.data.error;
-    } else if (error.response?.status === 400) {
-      errorMessage = 'Bad request - check your input data';
-    } else if (error.response?.status === 500) {
-      errorMessage = 'Server error - check backend console';
-    }
-    
-    return { 
-      success: false, 
-      message: errorMessage,
-      status: error.response?.status
-    };
-  }
-};
+  const register = async (userData) => {
+    try {
+      console.log('🟡 Registration starting...');
+      
+      const response = await axios.post('/auth/register', userData);
+      console.log('✅ Registration success:', response.data);
+      
+      // ✅ Force check auth status
+      setTimeout(() => {
+        checkUserLoggedIn();
+      }, 1000);
 
-  // Login user
+      setUser(response.data.user);
+      return { success: true };
+
+    } catch (error) {
+      console.error('🔴 Registration failed:', error);
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Registration failed' 
+      };
+    }
+  };
+
   const login = async (userData) => {
     try {
+      console.log('🟡 Login starting...');
+      
       const response = await axios.post('/auth/login', userData);
+      console.log('✅ Login success:', response.data);
+      
+      setTimeout(() => {
+        checkUserLoggedIn();
+      }, 1000);
+
       setUser(response.data.user);
-      return { success: true, data: response.data };
+      return { success: true };
+
     } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
+      console.error('🔴 Login failed:', error);
       return { 
         success: false, 
         message: error.response?.data?.message || 'Login failed' 
@@ -91,7 +83,6 @@ const register = async (userData) => {
     }
   };
 
-  // Logout user
   const logout = async () => {
     try {
       await axios.get('/auth/logout');
