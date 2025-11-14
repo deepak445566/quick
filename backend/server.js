@@ -18,7 +18,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: 'https://dainty-figolla-0f3ef6.netlify.app',
+  origin: 'https://aquamarine-zabaione-41b11e.netlify.app',
   credentials: true
 }));
 
