@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.defaults.baseURL = 'http://localhost:5000/api';
+    axios.defaults.baseURL = 'https://quick-4p16.onrender.com/api';
     axios.defaults.withCredentials = true;
   }, []);
 
