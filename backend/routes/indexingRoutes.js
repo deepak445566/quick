@@ -91,10 +91,10 @@ router.post('/submit-url', isAuthenticated, async (req, res) => {
   }
 });
 
-// ✅ Batch URLs - Simulated version
+// ✅ Batch URLs submit karna with delay
 router.post('/submit-batch', isAuthenticated, async (req, res) => {
   try {
-    const { urls } = req.body;
+    const { urls, delay = 2000 } = req.body; // Default 2 seconds delay
     const userId = req.user._id;
     
     if (!urls || !Array.isArray(urls)) {
@@ -104,11 +104,31 @@ router.post('/submit-batch', isAuthenticated, async (req, res) => {
       });
     }
 
-    const results = [];
+    if (urls.length > 50) {
+      return res.status(400).json({
+        success: false,
+        message: 'Maximum 50 URLs allowed per batch'
+      });
+    }
 
-    for (const url of urls) {
+    const results = [];
+    const processedUrls = new Set(); // Duplicate check
+
+    for (const [index, url] of urls.entries()) {
       try {
-        new URL(url); // Validate URL
+        // Skip duplicates
+        if (processedUrls.has(url)) {
+          results.push({
+            url,
+            success: false,
+            error: 'Duplicate URL'
+          });
+          continue;
+        }
+        processedUrls.add(url);
+
+        // Validate URL
+        new URL(url);
         
         // History record create karo
         let historyRecord;
@@ -122,10 +142,20 @@ router.post('/submit-batch', isAuthenticated, async (req, res) => {
           console.error('History creation error:', historyError);
         }
 
+        // ✅ SIMULATE Google Indexing (Real API integration ke liye replace karein)
+        console.log(`🟡 Processing URL ${index + 1}/${urls.length}:`, url);
+        
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         // Simulate success
         if (historyRecord) {
           await History.findByIdAndUpdate(historyRecord._id, {
-            status: 'indexed'
+            status: 'indexed',
+            googleResponse: { 
+              simulated: true,
+              message: 'Batch processing - Real Google API integration required'
+            }
           });
         }
 
@@ -135,8 +165,10 @@ router.post('/submit-batch', isAuthenticated, async (req, res) => {
           historyId: historyRecord?._id
         });
 
-        // Small delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // User-configured delay between URLs
+        if (index < urls.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
         
       } catch (error) {
         // Error handling
@@ -163,11 +195,18 @@ router.post('/submit-batch', isAuthenticated, async (req, res) => {
       }
     }
 
+    const successCount = results.filter(r => r.success).length;
+    const failedCount = results.filter(r => !r.success).length;
+
     res.json({
       success: true,
-      message: `Processed ${urls.length} URLs (Demo Mode)`,
+      message: `Processed ${urls.length} URLs - ${successCount} successful, ${failedCount} failed`,
       results: results,
-      note: 'Real Google API integration required'
+      stats: {
+        total: urls.length,
+        successful: successCount,
+        failed: failedCount
+      }
     });
 
   } catch (error) {

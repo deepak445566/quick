@@ -7,7 +7,7 @@ import Fqs from './components/Fqs'
 import Footer from './components/Footer'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import Dashboard from './pages/Dashboard' // ✅ Naya import
+
 import SubmitLink from './pages/SubmitLink'
 import History from './pages/History'
 
@@ -30,9 +30,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
-        {/* ✅ Dashboard route - navbar/footer included in component */}
-        <Route path="/dashboard" element={<Dashboard />} />
-  
+
 <Route path="/submit" element={<SubmitLink />} />
 <Route path="/history" element={<History />} />
       </Routes>
