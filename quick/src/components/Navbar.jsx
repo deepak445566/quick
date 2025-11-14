@@ -128,6 +128,9 @@ function Navbar() {
             <a href="/history" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
               History
             </a>
+             <a href="/grand" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
+              Grant
+            </a>
             
             {/* User info and logout */}
             <div className="mt-4 text-center">

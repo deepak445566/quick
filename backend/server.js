@@ -23,7 +23,7 @@ app.use(cors({
     
     const allowedOrigins = [
       'http://localhost:5173',
-      'https://aquamarine-zabaione-41b11e.netlify.app',
+      'https://dapper-druid-feb24d.netlify.app',
      
     ];
     
