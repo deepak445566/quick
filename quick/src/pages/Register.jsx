@@ -62,7 +62,7 @@ const Register = () => {
     console.log('🟡 Registration result:', result);
 
     if (result.success) {
-      navigate('/dashboard');
+      navigate('/submit');
     } else {
       setError(result.message);
     }

@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // ✅ COMPLETE RESET - Fresh configuration
-    axios.defaults.baseURL = 'http://localhost:5000/api';
+    axios.defaults.baseURL = 'https://quick-4p16.onrender.com/api';
     axios.defaults.withCredentials = true;
     
     console.log('🔄 Axios configured for:', axios.defaults.baseURL);
