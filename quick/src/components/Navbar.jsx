@@ -1,50 +1,32 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext';
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 function Navbar() {
-  const navigate = useNavigate();
-  const { user, setShowLogin, setUser , loading } = useAppContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
   
   const openMenuHandler = () => setIsMenuOpen(true);
   const closeMenuHandler = () => setIsMenuOpen(false);
   
-  const handleLogin = () => {
-    setShowLogin(true);
-  };
-
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    navigate('/');
+    logout();
+    closeMenuHandler();
+    window.location.href = '/';
   };
 
-  const goToUserHome = () => {
-    navigate('/userhome');
+  const handleLogin = () => {
+    window.location.href = '/login';
   };
-
-  if (loading) {
-    return (
-      <nav className="fixed top-0 z-50 flex items-center justify-between w-full py-4 px-6 backdrop-blur text-white text-sm min-h-[13vh] w-screen">
-        <a href="#" className="flex items-center gap-1">
-          <h1 className="orbi text-lg">StellarServe Indexing Tool</h1>
-        </a>
-        <div className="text-white">Loading...</div>
-      </nav>
-    );
-  }
 
   return (
-   <>
-     <nav className="fixed top-0 z-50 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-32 backdrop-blur text-white text-sm min-h-[13vh] w-screen">
+    <>
+      <nav className="fixed top-0 z-50 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-32 backdrop-blur text-white text-sm min-h-[13vh]">
         {/* Logo */}
-        <a href="#" className="flex items-center gap-1">
+        <a href="/" className="flex items-center gap-1">
           <h1 className="orbi text-lg">StellarServe Indexing Tool</h1>
         </a>
 
-        {/* ✅ UPDATED: Desktop Nav Links - Conditional based on login */}
+        {/* Desktop Nav Links - Conditional based on login */}
         <div className="hidden md:flex items-center gap-6 transition duration-500 orbi">
           {/* Always show Home */}
           <a href="/" className="hover:text-purple-500 transition">
@@ -52,43 +34,46 @@ function Navbar() {
           </a>
 
           {/* Show these only when user is logged in */}
-          {user && (
+          {user ? (
             <>
-              <button 
-                onClick={goToUserHome}
-                className="hover:text-purple-500 transition bg-transparent border-none cursor-pointer"
-              >
-                Dashboard
-              </button>
-              <a href="/submitlinks" className="hover:text-purple-500 transition">
-                Submit Links
+              <a href="/submit" className="hover:text-purple-500 transition">
+                Submit Link
               </a>
               <a href="/history" className="hover:text-purple-500 transition">
                 History
               </a>
-              <a href="/credits" className="hover:text-purple-500 transition">
-                Credits
+            </>
+          ) : (
+            <>
+              {/* Show these when user is not logged in */}
+              <a href="/about" className="hover:text-purple-500 transition">
+                About
               </a>
-              <a href="/account" className="hover:text-purple-500 transition">
-                Account
+              <a href="/features" className="hover:text-purple-500 transition">
+                Features
+              </a>
+              <a href="/contact" className="hover:text-purple-500 transition">
+                Contact
               </a>
             </>
           )}
         </div>
 
-        {/* ✅ UPDATED: Desktop Buttons */}
+        {/* Desktop Auth Buttons - Conditional */}
         <div className="hidden md:flex items-center gap-4">
           {user ? (
-            <>
-              <span className="text-white text-sm">Welcome, {user.fullname}</span>
+            // ✅ Logged in - Show user info and logout
+            <div className="flex items-center gap-4">
+              <span className="text-sm">Welcome, {user.fullname || user.userId}</span>
               <button 
+                className="px-6 py-2.5 bg-red-600 hover:bg-red-700 active:scale-95 transition-all rounded-xl text-sm" 
                 onClick={handleLogout}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 active:scale-95 transition-all rounded-xl text-sm"
               >
                 Logout
               </button>
-            </>
+            </div>
           ) : (
+            // ✅ Not logged in - Show login button
             <button 
               className="px-6 py-2.5 bg-[#2563EB] hover:bg-[#1d4ed8] active:scale-95 transition-all rounded-xl text-sm" 
               onClick={handleLogin}
@@ -122,7 +107,7 @@ function Navbar() {
         </button>
       </nav>
 
-      {/* ✅ UPDATED: Mobile Navigation Overlay */}
+      {/* Mobile Navigation Overlay - Conditional */}
       <div
         className={`fixed inset-0 z-[100] bg-[#05091A] text-white backdrop-blur flex flex-col items-center justify-center text-lg gap-6 md:hidden transition-transform duration-300 ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
@@ -133,50 +118,49 @@ function Navbar() {
           Home
         </a>
 
-        {/* Show these only when user is logged in */}
-        {user && (
+        {/* Conditional links based on login */}
+        {user ? (
+          // ✅ Mobile menu when logged in
           <>
-            <button 
-              onClick={() => { goToUserHome(); closeMenuHandler(); }}
-              className="hover:text-purple-500 transition bg-transparent border-none cursor-pointer text-lg"
-            >
-              Dashboard
-            </button>
-            <a href="/submitlinks" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
-              Submit Links
+            <a href="/submit" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
+              Submit Link
             </a>
             <a href="/history" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
               History
             </a>
-            <a href="/credits" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
-              Credits
-            </a>
-            <a href="/account" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
-              Account
-            </a>
+            
+            {/* User info and logout */}
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-300">Welcome, {user.fullname || user.userId}</p>
+              <button 
+                className="px-8 py-3 bg-red-600 hover:bg-red-700 transition-all rounded-xl mt-4" 
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </div>
           </>
-        )}
-
-        {/* Login/Logout Buttons */}
-        {user ? (
-          <div className="flex flex-col gap-4 items-center mt-4">
-            <span className="text-white text-center">
-              Welcome,<br/>{user.fullname}
-            </span>
-            <button 
-              onClick={() => { handleLogout(); closeMenuHandler(); }}
-              className="px-6 py-2 bg-red-600 hover:bg-red-700 transition-all rounded-xl"
-            >
-              Logout
-            </button>
-          </div>
         ) : (
-          <button 
-            className="px-8 py-3 bg-[#2563EB] hover:bg-[#1d4ed8] transition-all rounded-xl mt-4" 
-            onClick={() => { handleLogin(); closeMenuHandler(); }}
-          >
-            Login
-          </button>
+          // ✅ Mobile menu when not logged in
+          <>
+            <a href="/about" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
+              About
+            </a>
+            <a href="/features" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
+              Features
+            </a>
+            <a href="/contact" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
+              Contact
+            </a>
+
+            {/* Mobile Login Button */}
+            <button 
+              className="px-8 py-3 bg-[#2563EB] hover:bg-[#1d4ed8] transition-all rounded-xl mt-4" 
+              onClick={() => { handleLogin(); closeMenuHandler(); }}
+            >
+              Login
+            </button>
+          </>
         )}
 
         {/* Close Button */}
@@ -201,8 +185,8 @@ function Navbar() {
           </svg>
         </button>
       </div>
-   </>
-  )
+    </>
+  );
 }
 
-export default Navbar
+export default Navbar;
