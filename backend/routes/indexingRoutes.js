@@ -3,13 +3,13 @@ import { isAuthenticated } from '../middleware/auth.js';
 import History from '../models/History.js';
 
 const router = express.Router();
-
 router.post('/submit-url', isAuthenticated, async (req, res) => {
   try {
     const { url } = req.body;
-    const userId = req.user._id;
+    const userId = req.user._id; // ✅ Yeh theek hai
     
     console.log('🟡 Received URL for indexing:', url);
+    console.log('👤 User ID:', userId);
     
     if (!url) {
       return res.status(400).json({ 
@@ -32,7 +32,7 @@ router.post('/submit-url', isAuthenticated, async (req, res) => {
     let historyRecord;
     try {
       historyRecord = await History.create({
-        userId,
+        userId, // ✅ String userId use hoga
         url,
         status: 'submitted'
       });
@@ -41,16 +41,15 @@ router.post('/submit-url', isAuthenticated, async (req, res) => {
       console.error('🔴 History creation error:', historyError);
     }
 
-    // ✅ SIMULATE SUCCESS - Google API integration ke bina
+    // ✅ SIMULATE SUCCESS
     console.log('✅ Simulating Google Indexing for:', url);
     
-    // History update karo simulated success ke saath
     if (historyRecord) {
       await History.findByIdAndUpdate(historyRecord._id, {
         status: 'indexed',
         googleResponse: { 
           simulated: true,
-          message: 'Indexing simulation - Real Google API integration required'
+          message: 'Indexing simulation'
         }
       });
     }
@@ -60,8 +59,7 @@ router.post('/submit-url', isAuthenticated, async (req, res) => {
       message: 'URL submitted for indexing (Demo Mode)',
       submittedUrl: url,
       historyId: historyRecord?._id,
-      timestamp: new Date().toISOString(),
-      note: 'Real Google Indexing API integration required for production'
+      timestamp: new Date().toISOString()
     });
 
   } catch (error) {

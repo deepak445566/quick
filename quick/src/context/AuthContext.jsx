@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // ✅ COMPLETE RESET - Fresh configuration
-    axios.defaults.baseURL = 'https://quick-4p16.onrender.com/api';
+    axios.defaults.baseURL = 'http://localhost:5000/api';
     axios.defaults.withCredentials = true;
     
     console.log('🔄 Axios configured for:', axios.defaults.baseURL);
@@ -36,29 +36,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (userData) => {
-    try {
-      console.log('🟡 Registration starting...');
-      
-      const response = await axios.post('/auth/register', userData);
-      console.log('✅ Registration success:', response.data);
-      
-      // ✅ Force check auth status
-      setTimeout(() => {
-        checkUserLoggedIn();
-      }, 1000);
 
-      setUser(response.data.user);
-      return { success: true };
-
-    } catch (error) {
-      console.error('🔴 Registration failed:', error);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Registration failed' 
-      };
-    }
-  };
 
   const login = async (userData) => {
     try {
@@ -95,7 +73,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
-    register,
+  
     login,
     logout
   };

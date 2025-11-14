@@ -6,7 +6,7 @@ import Process from './components/Process'
 import Fqs from './components/Fqs'
 import Footer from './components/Footer'
 import Login from './pages/Login'
-import Register from './pages/Register'
+
 
 import SubmitLink from './pages/SubmitLink'
 import History from './pages/History'
@@ -29,7 +29,7 @@ function App() {
         
         {/* Login/Register - standalone (no navbar/footer) */}
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+       
         <Route path='/grand' element={<Grand/>}/>
 
 <Route path="/submit" element={<SubmitLink />} />

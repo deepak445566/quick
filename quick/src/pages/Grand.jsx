@@ -38,7 +38,7 @@ const Grand = () => {
   id: 5,
   title: "Add Our Service Account Email",
   description:
-    "Enter this exact email address: instant-indexing-key@indexing-477510.iam.gserviceaccount.com - This grants our system secure, limited access to submit indexing requests on your behalf.",
+    "Enter this exact email address: instant-indexing-key@indexing2-478207.iam.gserviceaccount.com - This grants our system secure, limited access to submit indexing requests on your behalf.",
   icon: "📧",
   color: "from-indigo-500 to-violet-500",
 },

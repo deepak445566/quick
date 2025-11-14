@@ -42,6 +42,9 @@ function Navbar() {
               <a href="/history" className="hover:text-purple-500 transition">
                 History
               </a>
+              <a href="/grand" className="hover:text-purple-500 transition">
+                Grant
+              </a>
             </>
           ) : (
             <>
@@ -62,9 +65,9 @@ function Navbar() {
         {/* Desktop Auth Buttons - Conditional */}
         <div className="hidden md:flex items-center gap-4">
           {user ? (
-            // ✅ Logged in - Show user info and logout
+            // ✅ Logged in - Show "Admin" instead of user name
             <div className="flex items-center gap-4">
-              <span className="text-sm">Welcome, {user.fullname || user.userId}</span>
+              <span className="text-sm">Welcome, Admin</span> {/* ✅ Fixed: Always show "Admin" */}
               <button 
                 className="px-6 py-2.5 bg-red-600 hover:bg-red-700 active:scale-95 transition-all rounded-xl text-sm" 
                 onClick={handleLogout}
@@ -128,13 +131,13 @@ function Navbar() {
             <a href="/history" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
               History
             </a>
-             <a href="/grand" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
+            <a href="/grand" onClick={closeMenuHandler} className="hover:text-purple-500 transition">
               Grant
             </a>
             
-            {/* User info and logout */}
+            {/* User info and logout - Fixed to show "Admin" */}
             <div className="mt-4 text-center">
-              <p className="text-sm text-gray-300">Welcome, {user.fullname || user.userId}</p>
+              <p className="text-sm text-gray-300">Welcome, Admin</p> {/* ✅ Fixed: Always show "Admin" */}
               <button 
                 className="px-8 py-3 bg-red-600 hover:bg-red-700 transition-all rounded-xl mt-4" 
                 onClick={handleLogout}

@@ -1,7 +1,5 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
 
-// Check if user is authenticated
 export const isAuthenticated = async (req, res, next) => {
   try {
     const { token } = req.cookies;
@@ -14,7 +12,15 @@ export const isAuthenticated = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id);
+    
+    // ✅ Create user object from token (no database query)
+    req.user = {
+      _id: decoded.id,
+      email: process.env.ADMIN_EMAIL || 'admin@stellarserve.com',
+      fullname: 'Admin User', 
+      userId: 'admin'
+    };
+    
     next();
   } catch (error) {
     res.status(401).json({

@@ -2,8 +2,7 @@ import mongoose from 'mongoose';
 
 const historySchema = new mongoose.Schema({
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    type: String, // ✅ Changed from ObjectId to String
     required: true
   },
   url: {
@@ -17,14 +16,10 @@ const historySchema = new mongoose.Schema({
     default: 'submitted'
   },
   googleResponse: {
-    type: mongoose.Schema.Types.Mixed // Store Google API response
+    type: mongoose.Schema.Types.Mixed
   },
   errorMessage: {
     type: String
-  },
-  submittedAt: {
-    type: Date,
-    default: Date.now
   }
 }, {
   timestamps: true

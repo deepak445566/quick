@@ -7,13 +7,14 @@ import { isAuthenticated } from '../middleware/auth.js';
 const router = express.Router();
 
 // ✅ User ka indexing history get karna
+// ✅ User ka indexing history get karna
 router.get('/my-history', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id; // ✅ String userId
     
     const history = await History.find({ userId })
-      .sort({ createdAt: -1 }) // Latest first
-      .limit(50); // Last 50 records
+      .sort({ createdAt: -1 })
+      .limit(50);
 
     res.json({
       success: true,

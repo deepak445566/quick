@@ -1,69 +1,6 @@
-import User from '../models/User.js';
-import sendToken from '../utils/jwtToken.js';
+import jwt from 'jsonwebtoken';
 
-export const registerUser = async (req, res) => {
-  try {
-    const { userId, fullname, email, password } = req.body;
-
-    console.log('🟢 Registration attempt:', { userId, fullname, email });
-
-    // Check if userId already exists
-    const existingUserById = await User.findOne({ userId });
-    if (existingUserById) {
-      console.log('🔴 User ID already exists');
-      return res.status(400).json({
-        success: false,
-        message: 'User ID already exists'
-      });
-    }
-
-    // Check if email already exists
-    const existingUserByEmail = await User.findOne({ email });
-    if (existingUserByEmail) {
-      console.log('🔴 Email already exists');
-      return res.status(400).json({
-        success: false,
-        message: 'Email already exists'
-      });
-    }
-
-    // Create user
-    const user = await User.create({
-      userId,
-      fullname,
-      email,
-      password
-    });
-
-    console.log('✅ User created successfully');
-    sendToken(user, 201, res);
-
-  } catch (error) {
-    console.error('❌ Registration error:', error);
-    
-    if (error.code === 11000) {
-      if (error.keyPattern.userId) {
-        return res.status(400).json({
-          success: false,
-          message: 'User ID already exists'
-        });
-      }
-      if (error.keyPattern.email) {
-        return res.status(400).json({
-          success: false,
-          message: 'Email already exists'
-        });
-      }
-    }
-    
-    res.status(500).json({
-      success: false,
-      message: 'Server error: ' + error.message
-    });
-  }
-};
-
-// Login user
+// Hardcoded login function
 export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -76,38 +13,66 @@ export const loginUser = async (req, res, next) => {
       });
     }
 
-    // Find user in database
-    const user = await User.findOne({ email }).select('+password');
+    // ✅ Hardcoded credentials from .env
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@stellarserve.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'StellarServe123';
 
-    if (!user) {
+    console.log('🔐 Login attempt:', { email, adminEmail });
+
+    if (email === adminEmail && password === adminPassword) {
+      // ✅ Create temporary user object
+      const tempUser = {
+        _id: 'admin-user-id',
+        email: adminEmail,
+        fullname: 'Admin User',
+        userId: 'admin'
+      };
+
+      // ✅ Generate JWT token DIRECTLY (sendToken function ke bina)
+      const token = jwt.sign(
+        { id: tempUser._id }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: '7d' }
+      );
+
+      // ✅ Set cookie DIRECTLY
+      const cookieOptions = {
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        path: '/'
+      };
+
+      console.log('🍪 Setting cookie with options:', cookieOptions);
+
+      res.status(200)
+        .cookie('token', token, cookieOptions)
+        .json({
+          success: true,
+          token,
+          user: tempUser,
+          message: 'Login successful'
+        });
+
+    } else {
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
 
-    // Check if password is correct
-    const isPasswordMatched = await user.comparePassword(password);
-
-    if (!isPasswordMatched) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    sendToken(user, 200, res);
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: 'Server error'
     });
   }
 };
 
 // Logout user
 export const logoutUser = async (req, res, next) => {
-  // ✅ Simple and effective
   res.cookie('token', '', {
     expires: new Date(Date.now()),
     httpOnly: true,
@@ -121,10 +86,16 @@ export const logoutUser = async (req, res, next) => {
   });
 };
 
-// Get currently logged in user details
+// Get user profile
 export const getUserProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id);
+    // ✅ Return hardcoded user info
+    const user = {
+      _id: 'admin-user-id',
+      email: process.env.ADMIN_EMAIL || 'admin@stellarserve.com',
+      fullname: 'Admin User',
+      userId: 'admin'
+    };
 
     res.status(200).json({
       success: true,
